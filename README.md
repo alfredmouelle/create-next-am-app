@@ -11,7 +11,12 @@
 
 # create-next-am-app
 
-To install dependencies:
+## Run globally with
+```bash
+bunx create-next-am-app
+```
+
+## To install dependencies local:
 
 ```bash
 bun install
