@@ -13,19 +13,17 @@
 
 ## Run globally with
 ```bash
-bunx create-next-am-app
+npx create-next-am-app
 ```
 
-## To install dependencies local:
+## Run locally
 
 ```bash
-bun install
+npm install
 ```
 
 To run:
 
 ```bash
-bun run index.js
+npm run index.js
 ```
-
-This project was created using `bun init` in bun v1.1.27. [Bun](https://bun.sh) is a fast all-in-one JavaScript runtime.

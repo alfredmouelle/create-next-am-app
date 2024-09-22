@@ -1,7 +1,8 @@
 {
   "name": "@alfredmouelle/create-next-am-app",
   "module": "index.js",
-  "version": "0.1.1",
+  "version": "0.1.2",
+  "type": "module",
   "description": "Créer une application Next.js avec des configurations personnalisées",
   "author": {
     "name": "Alfred Mouelle",
@@ -20,13 +21,14 @@
     "nextjs",
     "starter",
     "bun",
-    "shadcn"
+    "shadcn",
+    "cli"
   ],
   "dependencies": {
     "child_process": "^1.0.2",
     "fs": "^0.0.1-security",
     "fs-extra": "^11.2.0",
-    "path": "^0.12.7",
-    "readline": "^1.3.0"
+    "inquirer": "^11.0.2",
+    "path": "^0.12.7"
   }
 }

@@ -1,28 +1,24 @@
 #!/usr/bin/env node
 
-const { execSync } = require('child_process');
-const fs = require('fs');
-const path = require('path');
-const readline = require('readline');
-const fsExtra = require('fs-extra');
+import { execSync } from 'child_process';
+import fs from 'fs';
+import fsExtra from 'fs-extra';
+import inquirer from 'inquirer';
+import path from 'path';
 
-const eslintConf = require('./configs/eslintrc.json')
-const prettierConf = require('./configs/prettierrc.json')
+const __dirname = path.dirname(new URL(import.meta.url).pathname);
+
+const eslintConf = fs.readFileSync(path.join(__dirname, 'configs/eslintrc.json'), 'utf8');
+const prettierConf = fs.readFileSync(path.join(__dirname, 'configs/prettierrc.json'), 'utf8');
 const nextConf = fs.readFileSync(path.join(__dirname, 'configs/next-config.js'), 'utf8');
 const appConf = fs.readFileSync(path.join(__dirname, 'configs/app-config.js'), 'utf8')
 const middlewareConf = fs.readFileSync(path.join(__dirname, 'configs/middleware.js'), 'utf8')
 const nextSafeActionConf = fs.readFileSync(path.join(__dirname, 'configs/next-safe-actions.js'), 'utf8');
 const nextSitemapConf = fs.readFileSync(path.join(__dirname, 'configs/next-sitemap.js'), 'utf8')
+const resendConf = fs.readFileSync(path.join(__dirname, 'configs/resend.js'), 'utf8')
 const envConf = fs.readFileSync(path.join(__dirname, 'configs/env.txt'), 'utf8');
 const cursorConf = fs.readFileSync(path.join(__dirname, 'configs/cursor.txt'), 'utf8');
 const readmeConf = fs.readFileSync(path.join(__dirname, 'configs/readme.md'), 'utf8');
-
-const rl = readline.createInterface({
-  input: process.stdin,
-  output: process.stdout
-});
-
-const question = (query) => new Promise((resolve) => rl.question(query, resolve));
 
 const runCommand = (command) => {
   try {
@@ -32,6 +28,19 @@ const runCommand = (command) => {
     process.exit(1);
   }
 };
+
+function getPmx(pm) {
+  switch (pm) {
+    case 'npm':
+      return 'npx';
+    case 'pnpm':
+      return 'pnpm dlx'
+    case 'yarn':
+      return 'yarn'
+    default:
+      return 'bunx';
+  }
+}
 
 const updatePackageJson = (projectPath) => {
   const packageJsonPath = path.join(projectPath, 'package.json');
@@ -93,7 +102,6 @@ const updateTailwindConfig = (projectPath) => {
     }
 
     fs.writeFileSync(tailwindConfigPath, tailwindConfig);
-    console.log('Tailwind configuration updated with @tailwindcss/typography plugin.');
   }
 };
 
@@ -109,15 +117,12 @@ const moveAppFolder = (projectPath, useI18n) => {
     componentsJson.tailwind = { ...componentsJson.tailwind, "css": "app/globals.css" }
     fs.writeFileSync(componentsJsonPath, JSON.stringify(componentsJson, null, 2));
 
-    console.log('Dossier app déplacé de src/app à la racine du projet.');
-
     if (useI18n) {
       const localeDirPath = path.join(rootAppPath, '[locale]');
       if (!fs.existsSync(localeDirPath)) {
         fs.mkdirSync(localeDirPath);
       }
 
-      // Déplacer tous les fichiers .tsx dans le sous-dossier [locale]
       fs.readdirSync(rootAppPath).forEach(file => {
         if (file.endsWith('.tsx')) {
           const oldPath = path.join(rootAppPath, file);
@@ -125,11 +130,7 @@ const moveAppFolder = (projectPath, useI18n) => {
           fs.renameSync(oldPath, newPath);
         }
       });
-
-      console.log('Fichiers .tsx déplacés dans le sous-dossier [locale] pour l\'internationalisation.');
     }
-  } else {
-    console.log('Le dossier src/app n\'existe pas. Aucun déplacement nécessaire.');
   }
 };
 
@@ -140,12 +141,10 @@ const copyLocalesFolder = (projectPath) => {
   if (fs.existsSync(localesSourcePath)) {
     fsExtra.copySync(localesSourcePath, localesDestPath);
     console.log('Dossier locales copié à la racine du projet.');
-  } else {
-    console.log('Le dossier locales n\'existe pas dans configs.');
   }
 };
 
-const finalizeProject = (projectPath) => {
+const commitProject = (projectPath) => {
   process.chdir(projectPath);
   
   try {
@@ -157,11 +156,14 @@ const finalizeProject = (projectPath) => {
 };
 
 const createNextApp = async () => {
-  const projectName = await question('Quel est le nom de votre projet ? ');
+  const { pm } = await inquirer.prompt([{ type: 'list', name: 'pm', message: 'Quel package manager utiliser ?', choices: ['bun', 'npm', 'pnpm', 'yarn'] }]);
+  const pmx = getPmx(pm);
+
+  const { projectName } = await inquirer.prompt([{ type: 'input', name: 'projectName', message: 'Quel est le nom de votre projet ?', default: 'my-next-am-app' }]);
   const projectPath = path.join(process.cwd(), projectName);
 
   console.log('Création du projet Next.js...');
-  runCommand(`bunx create-next-app@latest ${projectName} --typescript --eslint --tailwind --app --src-dir --import-alias "@/*"`);
+  runCommand(`${pmx} create-next-app@latest ${projectName} --typescript --eslint --tailwind --app --src-dir --import-alias "@/*"`);
 
   process.chdir(projectPath);
 
@@ -190,73 +192,66 @@ const createNextApp = async () => {
     '@total-typescript/ts-reset': 'latest'
   };
 
-  runCommand(`bun add ${Object.keys(defaultDependencies).join(' ')}`);
-  runCommand(`bun add -D ${Object.keys(defaultDevDependencies).join(' ')}`);
+  runCommand(`${pm} add ${Object.keys(defaultDependencies).join(' ')}`);
+  runCommand(`${pm} add -D ${Object.keys(defaultDevDependencies).join(' ')}`);
   updatePackageJson
 
   console.log('Installation et configuration de shadcn...');
-  runCommand('bunx shadcn@latest init');
+  runCommand(`${pmx} shadcn@latest init`);
 
-  // console.log('Installation des composants shadcn...');
+  console.log('Installation des composants shadcn...');
   // const shadcnComponents = [
-  //   'input', 'button', 'select', 'label', 'dropdown-menu', 'drawer',
+  //   'input', 'select', 'dropdown-menu', 'drawer',
   //   'dialog', 'skeleton', 'card', 'sheet', 'form'
   // ];
   // shadcnComponents.map(component => {
-  //   runCommand(`bunx shadcn@latest add ${component}`);
+  //   runCommand(`${pmx} shadcn@latest add ${component}`);
   // });
   updateTailwindConfig(projectPath)
 
-  const useMail = await question('Voulez-vous utiliser l\'envoi de mails ? (y/n) ');
-  if (useMail.toLowerCase() !== 'n') {
+  const { useMail } = await inquirer.prompt([{ type: 'confirm', name: 'useMail', message: 'Voulez-vous utiliser l\'envoi de mails ?' }]);
+  if (useMail) {
     console.log('Installation des dépendances pour l\'envoi de mails...');
-    runCommand('bun add resend @react-email/components @react-email/render @react-email/tailwind');
-    const resendConfig = `
-      import { Resend } from 'resend';
-
-      export const resend = new Resend(process.env.RESEND_API_KEY);
-    `;
+    runCommand(`${pm} add resend @react-email/components @react-email/render @react-email/tailwind`);
     fs.mkdirSync(path.join(projectPath, 'src/lib'), { recursive: true });
-    fs.writeFileSync(path.join(projectPath, 'src/lib/resend.ts'), resendConfig);
+    fs.writeFileSync(path.join(projectPath, 'src/lib/resend.ts'), resendConf);
   }
 
-  const useI18n = await question('Voulez-vous internationaliser l\'application ? (y/n) ');
-  if (useI18n.toLowerCase() !== 'n') {
+  const { useI18n } = await inquirer.prompt([{ type: 'confirm', name: 'useI18n', message: 'Voulez-vous internationaliser l\'application ?' }]);
+  if (useI18n) {
     console.log('Installation de next-international...');
-    runCommand('bun add next-international');
+    runCommand(`${pm} add next-international`);
 
-    console.log('Mis à jour du fichier tsconfig.json...');
     const tsConfig = JSON.parse(fs.readFileSync(path.join(projectPath, 'tsconfig.json'), 'utf8'));
     tsConfig.compilerOptions.paths = { ...tsConfig.compilerOptions.paths, "@locales/*": ["./locales/*"] };
     fs.writeFileSync(path.join(projectPath, 'tsconfig.json'), JSON.stringify(tsConfig, null, 2));
-    
-    console.log('Configuration du middleware...');
+
     fs.writeFileSync(path.join(projectPath, 'middleware.ts'), middlewareConf);
 
     copyLocalesFolder(projectPath)
   }
 
-  const useMdx = await question('Voulez-vous utiliser des fichiers MDX pour du contenu statique ? (y/n) ');
-  if (useMdx.toLowerCase() !== 'n') {
+  const { useMdx } = await inquirer.prompt([{ type: 'confirm', name: 'useMdx', message: 'Voulez-vous utiliser des fichiers MDX pour du contenu statique ?' }]);
+  if (useMdx) {
     console.log('Installation des dépendances pour MDX...');
-    runCommand('bun add @mdx-js/loader @mdx-js/react @next/mdx gray-matter');
+    runCommand(`${pm} add @mdx-js/loader @mdx-js/react @next/mdx gray-matter`);
   }
 
-  const useDateFns = await question('Voulez-vous installer date-fns pour gérer les dates ? (y/n) ');
-  if (useDateFns.toLowerCase() !== 'n') {
-    console.log('Installation de date-fns...');
-    runCommand('bun add date-fns');
+  const { dateUtil } = await inquirer.prompt([{ type: 'list', name: 'dateUtil', message: 'Utilitaire de gestion de date à installer', choices: ['date-fns', 'moment'] }]);
+  if (dateUtil) {
+    console.log(`Installation de ${dateUtil}...`);
+    runCommand(`${pm} add ${dateUtil}`);
   }
 
 
-  const useDb = await question('Voulez-vous utiliser une base de données ? (y/n) ');
-  if (useDb.toLowerCase() !== 'n') {
-    const usePrisma = await question('Voulez-vous utiliser Prisma ? (y/n) ');
+  const { useDb } = await inquirer.prompt([{ type: 'confirm', name: 'useDb', message: 'Voulez-vous utiliser une base de données ?' }]);
+  if (useDb) {
+    const { usePrisma } = await inquirer.prompt([{ type: 'confirm', name: 'usePrisma', message: 'Voulez-vous utiliser Prisma ?' }]);
     
-    if (usePrisma.toLowerCase() !== 'n') {
+    if (usePrisma) {
       console.log('Installation et configuration de Prisma...');
-      runCommand('bun add -D prisma');
-      runCommand('bunx prisma init');
+      runCommand(`${pm} add -D prisma`);
+      runCommand(`${pmx} prisma init`);
       const prismaSchema = `
         generator client {
           provider = "prisma-client-js"
@@ -277,11 +272,11 @@ const createNextApp = async () => {
       `;
       fs.writeFileSync(path.join(projectPath, 'prisma/schema.prisma'), prismaSchema);
     } else {
-      const useDrizzle = await question('Voulez-vous utiliser Drizzle ? (y/n) ');
-      if (useDrizzle.toLowerCase() !== 'n') {
+      const { useDrizzle } = await inquirer.prompt([{ type: 'confirm', name: 'useDrizzle', message: 'Voulez-vous utiliser Drizzle ?' }]);
+      if (useDrizzle) {
         console.log('Installation et configuration de Drizzle...');
-        runCommand('bun add drizzle-orm pg');
-        runCommand('bun add -D drizzle-kit');
+        runCommand(`${pm} add drizzle-orm pg`);
+        runCommand(`${pm} add -D drizzle-kit`);
         const drizzleSchema = `
           import { pgTable, serial, text, timestamp } from 'drizzle-orm/pg-core';
   
@@ -299,42 +294,28 @@ const createNextApp = async () => {
     }
   }
 
-  console.log('Mise à jour du package.json...');
   updatePackageJson(projectPath);
-
-  console.log('Configuration de Prettier...');
-  fs.writeFileSync(path.join(projectPath, '.prettierrc'), JSON.stringify(prettierConf, null, 2));
-
-  console.log('Configuration de ESLint...');
-  fs.writeFileSync(path.join(projectPath, '.eslintrc.json'), JSON.stringify(eslintConf, null, 2));
-
-  console.log('Configuration de next-sitemap...');
+  fs.writeFileSync(path.join(projectPath, '.prettierrc'), prettierConf);
+  fs.writeFileSync(path.join(projectPath, '.eslintrc.json'), eslintConf);
   fs.writeFileSync(path.join(projectPath, 'next-sitemap.config.js'), nextSitemapConf);
-
-  console.log('Configuration de cursor IDE...');
   fs.writeFileSync(path.join(projectPath, '.cursorrules'), cursorConf);
-  
-  console.log('Intégration du readme');
   fs.writeFileSync(path.join(projectPath, 'README.md'), readmeConf);
-
-  console.log('Configuration de Next Safe Actions...');
   fs.writeFileSync(path.join(projectPath, 'src/lib/next-safe-action.ts'), nextSafeActionConf);
-
-  console.log('Configuration des variables d\'environnement...');
   fs.writeFileSync(path.join(projectPath, '.env.local'), envConf);
-
-  console.log('Configuration des paramètes système');
   fs.writeFileSync(path.join(projectPath, 'src/app.config.ts'), appConf);
 
-  if (useMdx.toLowerCase() !== 'n') {
-    console.log('Configuration de MDX...');
+  if (useMdx) {
     fs.writeFileSync(path.join(projectPath, 'next.config.js'), nextConf);
+
+    const oldNextConfigPath = path.join(projectPath, 'next.config.mjs');
+    if (fs.existsSync(oldNextConfigPath)) {
+      fs.unlinkSync(oldNextConfigPath);
+    }
   }
 
-  moveAppFolder(projectPath, useI18n.toLowerCase !== 'n');
-  finalizeProject(projectPath);
+  moveAppFolder(projectPath, useI18n);
+  // commitProject(projectPath);
   console.log('Projet créé avec succès !');
-  rl.close();
 };
 
 createNextApp();
