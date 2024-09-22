@@ -228,9 +228,7 @@ const createNextApp = async () => {
     const tsConfig = JSON.parse(fs.readFileSync(path.join(projectPath, 'tsconfig.json'), 'utf8'));
     tsConfig.compilerOptions.paths = { ...tsConfig.compilerOptions.paths, "@locales/*": ["./locales/*"] };
     fs.writeFileSync(path.join(projectPath, 'tsconfig.json'), JSON.stringify(tsConfig, null, 2));
-
     fs.writeFileSync(path.join(projectPath, 'middleware.ts'), middlewareConf);
-
     copyLocalesFolder(projectPath)
   }
 
@@ -238,6 +236,12 @@ const createNextApp = async () => {
   if (useMdx) {
     console.log('Installation des dépendances pour MDX...');
     runCommand(`${pm} add @mdx-js/loader @mdx-js/react @next/mdx gray-matter`);
+    
+    fs.writeFileSync(path.join(projectPath, 'next.config.js'), nextConf);
+    const oldNextConfigPath = path.join(projectPath, 'next.config.mjs');
+    if (fs.existsSync(oldNextConfigPath)) {
+      fs.unlinkSync(oldNextConfigPath);
+    }
   }
 
   const { dateUtil } = await inquirer.prompt([{ type: 'list', name: 'dateUtil', message: 'Utilitaire de gestion de date à installer', choices: ['date-fns', 'moment'] }]);
@@ -306,15 +310,6 @@ const createNextApp = async () => {
   fs.writeFileSync(path.join(projectPath, 'src/lib/next-safe-action.ts'), nextSafeActionConf);
   fs.writeFileSync(path.join(projectPath, '.env.local'), envConf);
   fs.writeFileSync(path.join(projectPath, 'src/app.config.ts'), appConf);
-
-  if (useMdx) {
-    fs.writeFileSync(path.join(projectPath, 'next.config.js'), nextConf);
-
-    const oldNextConfigPath = path.join(projectPath, 'next.config.mjs');
-    if (fs.existsSync(oldNextConfigPath)) {
-      fs.unlinkSync(oldNextConfigPath);
-    }
-  }
 
   moveAppFolder(projectPath, useI18n);
   commitProject(projectPath);
