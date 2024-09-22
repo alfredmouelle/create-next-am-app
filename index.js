@@ -123,6 +123,9 @@ const moveAppFolder = (projectPath, useI18n) => {
         fs.mkdirSync(localeDirPath);
       }
 
+
+      const layout = fs.readFileSync(path.join(__dirname, 'configs/app/intl-layout.js'), 'utf8');
+      fs.writeFileSync(path.join(projectPath, 'app/layout.tsx'), layout);
       fs.readdirSync(rootAppPath).forEach(file => {
         if (file.endsWith('.tsx')) {
           const oldPath = path.join(rootAppPath, file);
@@ -200,13 +203,13 @@ const createNextApp = async () => {
   runCommand(`${pmx} shadcn@latest init`);
 
   console.log('Installation des composants shadcn...');
-  // const shadcnComponents = [
-  //   'input', 'select', 'dropdown-menu', 'drawer',
-  //   'dialog', 'skeleton', 'card', 'sheet', 'form'
-  // ];
-  // shadcnComponents.map(component => {
-  //   runCommand(`${pmx} shadcn@latest add ${component}`);
-  // });
+  const shadcnComponents = [
+    'input', 'select', 'dropdown-menu', 'drawer',
+    'dialog', 'skeleton', 'card', 'sheet', 'form'
+  ];
+  shadcnComponents.map(component => {
+    runCommand(`${pmx} shadcn@latest add ${component}`);
+  });
   updateTailwindConfig(projectPath)
 
   const { useMail } = await inquirer.prompt([{ type: 'confirm', name: 'useMail', message: 'Voulez-vous utiliser l\'envoi de mails ?' }]);
@@ -314,7 +317,7 @@ const createNextApp = async () => {
   }
 
   moveAppFolder(projectPath, useI18n);
-  // commitProject(projectPath);
+  commitProject(projectPath);
   console.log('Projet créé avec succès !');
 };
 
