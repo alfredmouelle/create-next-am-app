@@ -207,7 +207,7 @@ const createNextApp = async () => {
     'input', 'select', 'dropdown-menu', 'drawer',
     'dialog', 'skeleton', 'card', 'sheet', 'form'
   ];
-  shadcnComponents.map(component => {
+  shadcnComponents.forEach(component => {
     runCommand(`${pmx} shadcn@latest add ${component}`);
   });
   updateTailwindConfig(projectPath)
