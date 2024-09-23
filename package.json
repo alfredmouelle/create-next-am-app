@@ -1,9 +1,9 @@
 {
   "name": "@alfredmouelle/create-next-app",
   "module": "index.js",
-  "version": "0.1.6",
+  "version": "0.1.7",
   "type": "module",
-  "description": "Créer une application Next.js avec des configurations personnalisées",
+  "description": "Créer une application Next.js avec des configurations personnalisées pour un développement axé sur l’essentiel",
   "author": {
     "name": "Alfred Mouelle",
     "email": "alfredmouelle@gmail.com",

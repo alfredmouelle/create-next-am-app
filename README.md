@@ -9,11 +9,11 @@
 [![Gmail](https://img.shields.io/badge/Gmail-D14836?style=for-the-badge&logo=gmail&logoColor=white)](mailto:alfredmouelle@gmail.com)
 [![ComeUp](https://img.shields.io/static/v1?style=for-the-badge&label=&message=Portfolio&color=blue)](https://alfred-mouelle.zd.fr)
 
-# create-next-am-app
+# create-next-app
 
 ## Run globally with
 ```bash
-npx create-next-am-app
+npx create-next-app
 ```
 
 ## Run locally
