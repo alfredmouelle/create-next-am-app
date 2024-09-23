@@ -1,17 +1,17 @@
 {
-  "name": "@alfredmouelle/create-next-am-app",
+  "name": "@alfredmouelle/create-next-app",
   "module": "index.js",
-  "version": "0.1.5",
+  "version": "0.1.6",
   "type": "module",
   "description": "Créer une application Next.js avec des configurations personnalisées",
   "author": {
     "name": "Alfred Mouelle",
     "email": "alfredmouelle@gmail.com",
-    "url": "https://alfred-mouelle.vercel.app"
+    "url": "https://alfredmouelle.vercel.app"
   },
   "license": "MIT",
   "bin": {
-    "create-next-am-app": "./index.js"
+    "create-next-app": "./index.js"
   },
   "scripts": {
     "start": "node index.js"
