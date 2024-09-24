@@ -1,20 +1,29 @@
 {
   "name": "@alfredmouelle/create-next-app",
   "module": "index.js",
-  "version": "0.1.7",
-  "type": "module",
-  "description": "Créer une application Next.js avec des configurations personnalisées pour un développement axé sur l’essentiel",
+  "version": "0.2.0",
+  "type": "commonjs",
+  "description": "Démarrez un projet Next.js sans vous soucier des mêmes configurations de bases. Tout est préparé pour vous accompagner à être plus productif.",
   "author": {
     "name": "Alfred Mouelle",
     "email": "alfredmouelle@gmail.com",
-    "url": "https://alfredmouelle.vercel.app"
+    "url": "https://alfredmouelle.com"
   },
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "files": [
+    "dist",
+    "templates"
+  ],
   "license": "MIT",
   "bin": {
-    "create-next-app": "./index.js"
+    "create-next-app": "./dist/index.js"
   },
   "scripts": {
-    "start": "node index.js"
+    "start": "node dist/index.js",
+    "build": "tsc && tsc-alias",
+    "prepublishOnly": "bun run build",
+    "format": "prettier src/ --write"
   },
   "keywords": [
     "create-next-app",
@@ -22,13 +31,29 @@
     "starter",
     "bun",
     "shadcn",
-    "cli"
+    "cli",
+    "tailwind",
+    "react"
   ],
   "dependencies": {
     "child_process": "^1.0.2",
     "fs": "^0.0.1-security",
     "fs-extra": "^11.2.0",
     "inquirer": "^11.0.2",
+    "module-alias": "^2.2.3",
     "path": "^0.12.7"
+  },
+  "_moduleAliases": {
+    "@": "dist"
+  },
+  "devDependencies": {
+    "@trivago/prettier-plugin-sort-imports": "^4.3.0",
+    "@types/fs-extra": "^11.0.4",
+    "eslint": "^9.11.1",
+    "eslint-config-prettier": "^9.1.0",
+    "eslint-plugin-check-file": "^2.8.0",
+    "prettier": "^3.3.3",
+    "tsc-alias": "^1.8.10",
+    "typescript": "^5.6.2"
   }
 }
