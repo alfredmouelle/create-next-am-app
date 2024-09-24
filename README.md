@@ -14,17 +14,21 @@
 ## Run globally with
 
 ```bash
-npx create-next-app
+bunx @alfredmouelle/create-next-app
 ```
 
 ## Run locally
 
 ```bash
-npm install
+bun install
 ```
 
 To run:
 
 ```bash
-npm run index.js
+bun run start
 ```
+
+---
+
+### Un peu léger pour le moment mais ne vous inquiétez pas :) De nouvelles intégrations arrivent bientôt <3
