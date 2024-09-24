@@ -1,7 +1,7 @@
 {
   "name": "@alfredmouelle/create-next-app",
   "module": "index.js",
-  "version": "0.2.2",
+  "version": "0.0.1",
   "type": "commonjs",
   "description": "Démarrez un projet Next.js sans vous soucier des mêmes configurations de bases. Tout est préparé pour vous accompagner à être plus productif.",
   "author": {
@@ -21,7 +21,7 @@
   },
   "scripts": {
     "start": "node dist/index.js",
-    "build": "tsc && tsc-alias",
+    "build": "tsc && tsc-alias && cp -r src/templates dist/templates",
     "prepublishOnly": "bun run build",
     "format": "prettier src/ --write"
   },

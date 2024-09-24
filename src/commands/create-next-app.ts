@@ -16,11 +16,11 @@ import { installDependencies, pmExec } from './commands';
 import { prompts } from './prompts';
 
 export const createNextApp = async () => {
+  const appRootPath = FsUtils.appRoot();
+  const templatePath = FsUtils.getPath(appRootPath, 'templates');
   const promptAnswers = await prompts();
-  const appRootPath = FsUtils.getPath(process.cwd());
-  const templatePath = FsUtils.getPath(appRootPath, 'src', 'templates');
   const instanceRootPath = FsUtils.getPath(
-    appRootPath,
+    FsUtils.getPath(process.cwd()),
     promptAnswers.projectName
   );
   const appSettings = {

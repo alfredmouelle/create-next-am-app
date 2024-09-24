@@ -7,6 +7,10 @@ export const FsUtils = {
     process.chdir(execPath);
   },
 
+  appRoot: function () {
+    return path.resolve(__dirname, '..', '..', 'dist');
+  },
+
   deletePath: function (targetPath: string) {
     if (fs.existsSync(targetPath)) {
       fs.unlinkSync(targetPath);

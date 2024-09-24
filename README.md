@@ -31,4 +31,4 @@ bun run start
 
 ---
 
-### Un peu léger pour le moment mais ne vous inquiétez pas :) De nouvelles intégrations arrivent bientôt <3
+### It's a bit light at the moment, but don't worry! New integrations are coming soon <3
