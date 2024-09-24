@@ -41,6 +41,7 @@ export async function prompts(): Promise<ProjectConfig> {
       message: 'Date management utility to install',
       choices: ['None', 'date-fns', 'moment'],
       filter: (val: string) => (val === 'None' ? null : val),
+      default: defaultConfig.dateUtil
     },
     {
       type: 'list',

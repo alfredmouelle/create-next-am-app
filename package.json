@@ -1,7 +1,7 @@
 {
   "name": "@alfredmouelle/create-next-app",
   "module": "index.js",
-  "version": "0.2.0",
+  "version": "0.2.2",
   "type": "commonjs",
   "description": "Démarrez un projet Next.js sans vous soucier des mêmes configurations de bases. Tout est préparé pour vous accompagner à être plus productif.",
   "author": {
